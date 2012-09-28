@@ -5,20 +5,28 @@ import sys
 import re
 import os
 import time
+import ConfigParser
 from string import atoi
 from lx import lixian_cli
 from animeDir import dirName
 
 def download(times,title,btAdd):
+    config=ConfigParser.ConfigParser()
+    with open("ktxpRss.cfg") as cfgfile:
+        config.readfp(cfgfile)
+    downloadpath=config.get("DownloadPath","Path")
     Title=title
     title=re.sub(r'\\',r'﹨'.decode('utf8').encode('gbk'),re.sub(r'/',r'∕'.decode('utf8').encode('gbk'),title.decode('utf8').encode('gbk')))
     dirNow=os.path.dirname(sys.argv[0])
-    downloadpath=r"D:\\Anime"
     strfile=dirNow+'\list.txt'
     torrent=dirNow+'\\Torrent\\'+title+'.torrent'
     add=btAdd.encode('utf8')
     print times,title
-    urllib.urlretrieve(add,torrent)
+    try:
+        urllib.urlretrieve(add,torrent)
+    except:
+        os.makedirs(dirNow+'\\Torrent')
+        urllib.urlretrieve(add,torrent)
     for i in range(0,9):
         try:
             (task_id,status,filename)=lixian_cli.add_task(['--bt',torrent])
