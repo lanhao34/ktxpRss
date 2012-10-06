@@ -44,14 +44,16 @@ for keywords in f2:
     s_utf=keywords.decode(sys.stdin.encoding).encode("utf-8")
     url_str='http://bt.ktxp.com/search.php?keyword=%s'%urllib.quote(s_utf)
     d = pq(url=url_str)
-    div=d('tbody tr')
-    diva=div('.ttitle')
-    for i in div(":contains(':')"):
-        times.append(pq(i).attr('title'))
-    for i in diva("[href^='/html']"):
-        titles.append(re.sub(r'amp;','',re.sub(r'(?=\<).*?(?<=>)','', pq(i).html())))
-    for i in diva("[href$='.torrent']"):
-        btAdds.append(r'http://bt.ktxp.com'+pq(i).attr('href'))
+    for j in d('tbody tr'):
+        div=pq(j)
+        if div('td').eq(1).text()=="新番连载".decode('utf'):
+            diva=div('.ttitle')
+            for i in div(":contains(':')"):
+                times.append(pq(i).attr('title'))
+            for i in diva("[href^='/html']"):
+                titles.append(re.sub(r'amp;','',re.sub(r'(?=\<).*?(?<=>)','', pq(i).html())))
+            for i in diva("[href$='.torrent']"):
+                btAdds.append(r'http://bt.ktxp.com'+pq(i).attr('href'))
     hasNew+=dbwrite.dbwrite(times,titles,btAdds)
 print hasNew
 os.system('pause')
