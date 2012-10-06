@@ -48,8 +48,8 @@ def download(times,title,btAdd):
     if filename.find('ALL')>=0:
         print "已完结".decode('utf').encode('gbk')
         return 1
-    Num=re.findall("(?<=\[)(\d+)(?:v\d+|_\d+)?(?=\])",filename)
-    dellist=['720']
+    Num=re.findall("(?<=\[)(\d+)(?:v\d+|_\w+)?(?=\])",filename)
+    dellist=['720','576']
     for i in Num:
         if len(i)>3:
             dellist.append(i)
@@ -64,7 +64,7 @@ def download(times,title,btAdd):
         Num=[]
         names=lixian_cli.list_task([task_id+'/','--name'])
         for filename in names:
-            Num+=re.findall("(?<=\[)(\d+)(?:v\d+|_\d+)?(?=\])",filename)
+            Num+=re.findall("(?<=\[)(\d+)(?:v\d+|_\w+)?(?=\])",filename)
         dellist=['720','576']
         for i in Num:
             if len(i)>3:
