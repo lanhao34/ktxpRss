@@ -73,9 +73,11 @@ def download(times,title,btAdd):
             pass
     try:
         downloadpath+='\\'+dirName(Title,max(Nums))
-    except:
+    except Exception,e:
+        print e
         Nums=[]
-        tmp_t=lxcmd.list.list_task(['list',t['id']+'/','--name'])
+        tmp_t=lxcmd.list.list_task([t['id']+'/','--name'])
+        print tmp_t
         for i in tmp_t:
             filename=i['name']
             Nums+=re.findall("(?<=\[)(\d+)(?:v\d+|_\d+)?(?=\])",filename)
@@ -93,7 +95,8 @@ def download(times,title,btAdd):
                 print "已完结".decode('utf').encode('gbk')
                 return 1
             downloadpath+='\\'+dirName(Title,max(Nums))
-        except:
+        except Exception,e:
+            print e
             downloadpath+='\\'+dirName(Title,['-1'])
     if t['name'].find('EMD')>=0:
         for i in range(0,9):

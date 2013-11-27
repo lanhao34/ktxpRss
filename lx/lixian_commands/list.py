@@ -53,4 +53,4 @@ def list_task(args):
 	columns = ['n', 'id', 'name', 'status', 'size', 'progress', 'speed', 'date', 'dcid', 'gcid', 'original-url', 'download-url']
 	columns = filter(lambda k: getattr(args, k), columns)
 
-	output_tasks(tasks, columns, args, not parent_ids)
+	return output_tasks(tasks, columns, args, not parent_ids)
