@@ -27,7 +27,7 @@ def j2f(sourceEncoding,destinationEncoding,sourceString):
     '''
     des = []
     nString = unicode(sourceString,sourceEncoding).encode('gbk')
-    #print nString
+    print nString
     sLen = len(nString)
     for i in range(0,sLen,2):
         nc = nString[i:i+2]
@@ -77,7 +77,7 @@ def f2j(sourceEncoding,destinationEncoding,sourceString):
 
 
 if __name__ == '__main__':
-    a = '无聊的实际飞地政地震法则翔飞信干部专案项目管理五月花输入法狗学习猴子后宫后果如果家产加餐信息产业增强技术商用终端程序日历'
+    a = '无聊的发财头发实际飞地政地震法则翔飞信干部专案项目管理五月花输入法狗学习猴子后宫后果如果家产加餐信息产业增强技术商用终端程序日历'
     a = unicode(a,'utf8').encode('gbk')
     b = j2f('gbk','big5',a)
     print unicode(b,'big5').encode('gbk')

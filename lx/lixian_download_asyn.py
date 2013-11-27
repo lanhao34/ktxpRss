@@ -22,7 +22,18 @@ class http_client(asynchat.async_chat):
 		host, port, path = m.groups()
 		port = int(port or 80)
 		path = path or '/'
-		if socket.gethostbyname(host) == '180.168.41.175':
+
+		def resolve_host(host):
+			try:
+				return socket.gethostbyname(host)
+			except:
+				pass
+		host_ip = resolve_host(host)
+		if not host_ip:
+			self.log_error("host can't be resolved: " + host)
+			self.size = None
+			return
+		if host_ip == '180.168.41.175':
 			# fuck shanghai dian DNS
 			self.log_error('gethostbyname failed')
 			self.size = None
@@ -169,7 +180,7 @@ class http_client(asynchat.async_chat):
 	def handle_http_relocate(self, location):
 		self.close()
 		relocate_times = getattr(self, 'relocate_times', 0)
-		max_relocate_times = getattr(self, 'max_relocate_times', 1)
+		max_relocate_times = getattr(self, 'max_relocate_times', 2)
 		if relocate_times >= max_relocate_times:
 			raise Exception('too many relocate times')
 		new_client = self.__class__(location, **self.args)
@@ -199,18 +210,19 @@ class ProgressBar:
 		self.displayed = True
 		bar_size = 40
 		if self.total:
-			percent = int(self.completed*100/self.total)
+			percent = self.completed * 100.0 / self.total
 			if percent > 100:
-				percent = 100
-			dots = bar_size * percent / 100
-			plus = percent - dots / bar_size * 100
+				percent = 100.0
+			dots = int(bar_size * percent / 100)
+			plus = percent / 100 * bar_size - dots
 			if plus > 0.8:
 				plus = '='
 			elif plus > 0.4:
-				plu = '>'
+				plus = '-'
 			else:
 				plus = ''
 			bar = '=' * dots + plus
+			percent = int(percent)
 		else:
 			percent = 0
 			bar = '-'

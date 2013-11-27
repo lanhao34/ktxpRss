@@ -1,113 +1,146 @@
 # -*- coding: utf-8 -*-
-import urllib
 from pyquery import PyQuery as pq
 import sys
 import re
 import os
 import time
-import ConfigParser
 from string import atoi
-from lx import lixian_cli
 from animeDir import dirName
+sys.path.append(os.path.join(os.path.dirname(sys.argv[0]),'lx'))
+import lixian_commands as lxcmd
+import lixian_cli
 
 def download(times,title,btAdd):
-    config=ConfigParser.ConfigParser()
-    with open("ktxpRss.cfg") as cfgfile:
-        config.readfp(cfgfile)
-    downloadpath=config.get("DownloadPath","Path")
     Title=title
-    title=re.sub(r'\\',r'﹨'.decode('utf8').encode('gbk'),re.sub(r'/',r'∕'.decode('utf8').encode('gbk'),title.decode('utf8').encode('gbk')))
+    title=re.sub(r'\\',r'﹨'.decode('utf8').encode('gbk'),re.sub(r'\"',r'',re.sub(r'/',r'∕'.decode('utf8').encode('gbk'),title.decode('utf8').encode('gbk'))))
     dirNow=os.path.dirname(sys.argv[0])
+    downloadpath=r"D:\Anime"
     strfile=dirNow+'\list.txt'
-    torrent=dirNow+'\\Torrent\\'+title+'.torrent'
+    # torrent=dirNow+'\\Torrent\\'+title+'.torrent'
     add=btAdd.encode('utf8')
     print times,title
-    try:
-        urllib.urlretrieve(add,torrent)
-    except:
-        os.makedirs(dirNow+'\\Torrent')
-        urllib.urlretrieve(add,torrent)
+    # try:
+    #     response = urllib2.urlopen(add)
+    #     import shutil
+    #     with open(torrent, 'wb') as output:
+    #         shutil.copyfileobj(response, output)
+    #     r = requests.get(add)
+    #     with open(torrent, "wb") as code:
+    #         code.write(r.content)
+    #     f = urllib2.urlopen(add)
+    #     data = f.read()
+    #     with open(torrent, "wb") as code:
+    #         code.write(data)
+    # except:
+    #     os.makedirs(dirNow+'\\Torrent')
+    #     f = urllib2.urlopen(add)
+    #     data = f.read()
+    #     with open(torrent, "wb") as code:
+    #         code.write(data)
     for i in range(0,9):
         try:
-            (task_id,status,filename)=lixian_cli.add_task(['--bt',torrent])
-            while (not status=='completed'):
-                time.sleep(60)
-                (task_id,status,filename)=lixian_cli.add_task(['--bt',torrent])
+            t=lxcmd.add.add_task(['--bt',add])[0]
+            if (not t['status']==2):
+                time.sleep(600)
+            while (not t['status']==2):
+                time.sleep(600)
+                t=lxcmd.add.add_task(['--bt',add])[0]
+                break
             break
-        except:
+        except Exception,e:
+            print e
             time.sleep(10)
-    print filename
     try:
-        Nums=re.findall("(?<=\[)(\d+-\d+)?(?=\])",filename)
-        Num=re.findall("(\d+)",Nums[0])
+        Nums=re.findall("(?<=\[)(\d+-\d+)?(?=\])",t['name'])
+        Num=Nums[0].split('-')
         if abs(atoi(Num[0])-atoi(Num[1]))>=5:
             print "已完结".decode('utf').encode('gbk')
             return 1
     except:
         pass
-    if filename.find('ALL')>=0:
+    if t['name'].find('ALL')>=0:
         print "已完结".decode('utf').encode('gbk')
         return 1
-    Num=re.findall("(?<=\[)(\d+)(?:v\d+|_\w+)?(?=\])",filename)
+    Nums=re.findall("(?<=\[)(\d+)(?:v\d+|_\w+)?(?=\])",t['name'])
     dellist=['720','576']
-    for i in Num:
+    for i in Nums:
         if len(i)>3:
             dellist.append(i)
     for i in dellist:
         try:
-            Num.remove(i)
+            Nums.remove(i)
         except:
             pass
     try:
-        downloadpath+='\\'+dirName(Title,max(Num))
+        downloadpath+='\\'+dirName(Title,max(Nums))
     except:
-        Num=[]
-        names=lixian_cli.list_task([task_id+'/','--name'])
-        for filename in names:
-            Num+=re.findall("(?<=\[)(\d+)(?:v\d+|_\w+)?(?=\])",filename)
+        Nums=[]
+        tmp_t=lxcmd.list.list_task(['list',t['id']+'/','--name'])
+        for i in tmp_t:
+            filename=i['name']
+            Nums+=re.findall("(?<=\[)(\d+)(?:v\d+|_\d+)?(?=\])",filename)
         dellist=['720','576']
-        for i in Num:
+        for i in Nums:
             if len(i)>3:
                 dellist.append(i)
         for i in dellist:
             try:
-                Num.remove(i)
+                Nums.remove(i)
             except:
                 pass
-        if atoi(max(Num))-atoi(min(Num))>=5:
-            print "已完结".decode('utf').encode('gbk')
-            return 1
-        downloadpath+='\\'+dirName(Title,max(Num))
-##    try:
-##        lixian_cli.download_task([task_id,"--output-dir",downloadpath])
-##    except:
-    for i in range(0,9):
         try:
-            lixian_cli.download_task([task_id,"--output-dir",downloadpath,"-c"])
-            break
+            if atoi(max(Nums))-atoi(min(Nums))>=5:
+                print "已完结".decode('utf').encode('gbk')
+                return 1
+            downloadpath+='\\'+dirName(Title,max(Nums))
         except:
-            time.sleep(10)
+            downloadpath+='\\'+dirName(Title,['-1'])
+    if t['name'].find('EMD')>=0:
+        for i in range(0,9):
+            try:
+                lxcmd.download.download_task([t['id']+"/.mp4","--output-dir",downloadpath,"-c"])
+                break
+            except Exception,ex:
+                print Exception,":",ex
+                lxcmd.delete.delete_task([t['id']])
+                time.sleep(10)
+    else:
+        for i in range(0,9):
+            try:
+                lxcmd.download.download_task([t['id'],"--output-dir",downloadpath,"-c"])
+                break
+            except Exception,ex:
+                print Exception,":",ex
+                lxcmd.delete.delete_task([t['id']])
+                time.sleep(10)
+    lxcmd.delete.delete_task([t['id']])
 
 def downNew(hasNew):
-    import sqlite3
-    cx = sqlite3.connect("ktxp.db")
-    cx.isolation_level = None
-    cx.text_factory = str
-    cu = cx.cursor()
-    cu.execute("select * from t1 Order by subTime desc LIMIT %s"%hasNew)
-    res = cu.fetchall()
-    for i in res[::-1]:
-##        if i[1]<'2012/08/11 05:42':
-##            continue
-        try:
-            result=download(i[1],i[2],i[3])
-            if result==1:
-                f3 = file('Download.log', 'a')
-                f3.write("%s %s 已完结\n"%(i[1],i[2]))
-                f3.close()
-        except:
-            os.system('pause')
-##        download(i[1],i[2],i[3])
+    if hasNew>0:
+        while 1:
+            try:
+                lixian_cli.login(['login'])
+                break
+            except Exception,ex:
+                print Exception,":",ex
+        import sqlite3
+        cx = sqlite3.connect("ktxp.db")
+        cx.isolation_level = None
+        cx.text_factory = str
+        cu = cx.cursor()
+        cu.execute("select * from t1 Order by subTime desc LIMIT %s"%hasNew)
+        res = cu.fetchall()
+        for i in res[::-1]:
+            print hasNew
+            if i[1]<'2012/11/02 19:11':
+                continue
+            while 1:
+                try:
+                    download(i[1],i[2],i[3])
+                    break
+                except Exception,ex:
+                    print Exception,":",ex
+            hasNew=hasNew-1
 
 if __name__ == '__main__':
 ##    import sqlite3
@@ -122,5 +155,5 @@ if __name__ == '__main__':
 ##            continue
 ##        download(i[1],i[2],i[3])
     
-    downNew(raw_input())
+    downNew(int(raw_input()))
     os.system('pause')

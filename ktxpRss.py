@@ -5,7 +5,7 @@ import sys
 import jft
 import re
 import time
-import download,dbwrite
+import download,dbwrite,ktxpupdate
 
 def rssUpdata():
     print time.strftime("%Y/%m/%d %X",time.localtime(time.time()))
@@ -13,6 +13,7 @@ def rssUpdata():
     titles=[]
     btAdds=[]
     dirNow=os.path.dirname(sys.argv[0])
+    dirNow='F:\Anime\ktxpRss'
     strfile=dirNow+'\list.txt'
     try:
         f2 = file(strfile, 'rb')
@@ -22,7 +23,7 @@ def rssUpdata():
         sys.exit(0)
     keywordList=f2.readlines()
     d = feedparser.parse(r'http://bt.ktxp.com/rss-sort-12.xml')
-    for j in range(len(d.entries)):
+    for j in range(len(d.entries))[::-1]:
         title=re.sub(r'amp;','',d.entries[j].title.encode('utf8'))
 ##        print title.decode('utf8')
         for keywords in keywordList:
@@ -48,9 +49,24 @@ def rssUpdata():
 ##            print time.strftime("%Y/%m/%d %X",time.strptime(d.entries[j].published,'%a, %d %b %Y %X +%f'))
             if hasWord:
                 times.append(time.strftime("%Y/%m/%d %H:%M",time.strptime(d.entries[j].published,'%a, %d %b %Y %X +%f')))
-                titles.append(title.decode('utf8'))
+                titles.append(re.sub(r'&quot;','"',title.decode('utf8')))
                 btAdds.append(d.entries[j].enclosures[0].href)
-    download.downNew(dbwrite.dbwrite(times,titles,btAdds))
+    hasNew=dbwrite.dbwrite(times,titles,btAdds)
+    miss=ktxpupdate.update()
+    if miss>0:
+        import sqlite3
+        cx = sqlite3.connect("ktxp.db")
+        cx.isolation_level = None
+        cx.text_factory = str
+        cu = cx.cursor()
+        cu.execute("select * from t1 Order by id desc LIMIT %s"%miss)
+        res = cu.fetchall()
+        for i in res:
+            f3 = file('Miss.log', 'a')
+            f3.write("%s %s\n"%(i[1],i[2]))
+            f3.close()
+    download.downNew(hasNew+miss)
 if __name__ == '__main__':
-    rssUpdata()
-    os.system('pause')
+    while(1):
+        rssUpdata()
+        time.sleep(600)
