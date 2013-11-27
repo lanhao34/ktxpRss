@@ -105,7 +105,6 @@ def download(times,title,btAdd):
                 break
             except Exception,ex:
                 print Exception,":",ex
-                lxcmd.delete.delete_task([t['id']])
                 time.sleep(10)
     else:
         for i in range(0,9):
@@ -114,7 +113,6 @@ def download(times,title,btAdd):
                 break
             except Exception,ex:
                 print Exception,":",ex
-                lxcmd.delete.delete_task([t['id']])
                 time.sleep(10)
     lxcmd.delete.delete_task([t['id']])
 
