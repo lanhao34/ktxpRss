@@ -3,11 +3,14 @@ import xlrd
 import os
 import sys
 import jft
+import ConfigParser
 
 def dirName(title,animeNum):
-    downloadpath=r"D:\\Anime"
-    dirNow=os.path.dirname(sys.argv[0])
-    data = xlrd.open_workbook('dirList.xls')
+    dirNow=os.getcwd()
+    cf = ConfigParser.ConfigParser()
+    cf.read(os.path.join(dirNow,"config.ini"))
+    downloadpath=cf.get('info','downloadpath')
+    data = xlrd.open_workbook(os.path.join(dirNow,'dirList.xls'))
     table = data.sheets()[0]
     keywords=table.col_values(3)
     for rownum in range(table.nrows):
@@ -38,10 +41,10 @@ def dirName(title,animeNum):
     if animeNum<'00':
         dirname=oldFolder
     try:
-        os.rename(r'%s\\%s'%(downloadpath,oldFolder),r'%s\\%s'%(downloadpath,dirname))
+        os.rename(os.path.join(downloadpath,oldFolder),os.path.join(downloadpath,dirname))
     except:
         try:
-            os.makedirs(r'%s\%s'%(downloadpath,dirname))
+            os.makedirs(os.path.join(downloadpath,dirname))
         except:
             None
     return dirname

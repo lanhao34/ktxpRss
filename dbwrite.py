@@ -1,8 +1,9 @@
 import sqlite3
-
+import os
 def dbwrite(times,titles,adds):
     hasNew=0
-    cx = sqlite3.connect("ktxp.db")
+    dirNow=os.getcwd()
+    cx = sqlite3.connect(os.path.join(dirNow,"ktxp.db"))
     cx.isolation_level = None
     cx.text_factory = str
     cu = cx.cursor()

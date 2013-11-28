@@ -8,11 +8,9 @@ import os
 import dbwrite
 
 def update():      
-    dirNow=os.path.dirname(sys.argv[0])
-
+    dirNow=os.getcwd()
     tLast="2013/03/05 00:00"
-    dirNow='D:\Anime\ktxpRss'
-    strfile=dirNow+'\list.txt'
+    strfile=os.path.join(dirNow,'list.txt')
     try:
         f2 = file(strfile, 'rb')
     except:
@@ -20,18 +18,18 @@ def update():
         os.system('pause')
         sys.exit(0)
 
-    strfile=dirNow+'\\time.txt'
-    try:
-        f3 = file(strfile, 'rb')
-        tTemp=f3.readlines()
-        tLast=tTemp[0]
-        f3.close()    
-    except:
-        try:
-            f3.close()
-        except:
-            None
-        print 'time.txt不存在或为空，默认起始时间为2012/04/05 00:00，你可以编辑time.txt修改起始时间，格式为"yyyy/mm/dd hh:mm"'.decode('utf').encode('gbk')
+    # strfile=os.path.join(dirNow,'time.txt')
+    # try:
+    #     f3 = file(strfile, 'rb')
+    #     tTemp=f3.readlines()
+    #     tLast=tTemp[0]
+    #     f3.close()    
+    # except:
+    #     try:
+    #         f3.close()
+    #     except:
+    #         None
+    #     print 'time.txt不存在或为空，默认起始时间为2012/04/05 00:00，你可以编辑time.txt修改起始时间，格式为"yyyy/mm/dd hh:mm"'.decode('utf').encode('gbk')
     ##    os.system('pause')
 
     print "正在更新中……".decode('utf').encode('gbk')
@@ -95,5 +93,5 @@ if __name__ == '__main__':
     update()
     print "请输入下载动漫数：".decode('utf')
     from download import downNew
-    downNew(raw_input())
+    downNew(int(raw_input()))
     os.system('pause')

@@ -9,13 +9,16 @@ from animeDir import dirName
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]),'lx'))
 import lixian_commands as lxcmd
 import lixian_cli
+import ConfigParser
 
 def download(times,title,btAdd):
     Title=title
     title=re.sub(r'\\',r'﹨'.decode('utf8').encode('gbk'),re.sub(r'\"',r'',re.sub(r'/',r'∕'.decode('utf8').encode('gbk'),title.decode('utf8').encode('gbk'))))
-    dirNow=os.path.dirname(sys.argv[0])
-    downloadpath=r"D:\Anime"
-    strfile=dirNow+'\list.txt'
+    dirNow=os.getcwd()
+    cf = ConfigParser.ConfigParser()
+    cf.read(os.path.join(dirNow,"config.ini"))
+    downloadpath=cf.get('info','downloadpath')
+    strfile=os.path.join(dirNow,'list.txt')
     # torrent=dirNow+'\\Torrent\\'+title+'.torrent'
     add=btAdd.encode('utf8')
     print times,title
@@ -142,7 +145,6 @@ def downNew(hasNew):
                 except Exception,ex:
                     print Exception,":",ex
             hasNew=hasNew-1
-
 if __name__ == '__main__':
 ##    import sqlite3
 ##    cx = sqlite3.connect("ktxp.db")
