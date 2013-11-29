@@ -4,3 +4,6 @@
 *.db
 *.bat
 *.xls
+build2
+config.ini
+dist/

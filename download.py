@@ -120,10 +120,13 @@ def download(times,title,btAdd):
     lxcmd.delete.delete_task([t['id']])
 
 def downNew(hasNew):
+    dirNow=os.getcwd()
+    cf = ConfigParser.ConfigParser()
+    cf.read(os.path.join(dirNow,"config.ini"))
     if hasNew>0:
         while 1:
             try:
-                lixian_cli.login(['login'])
+                lixian_cli.login([cf.get('thunder','account'),cf.get('thunder','password')])
                 break
             except Exception,ex:
                 print Exception,":",ex
