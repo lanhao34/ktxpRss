@@ -4,6 +4,7 @@
 *.db
 *.bat
 *.xls
-build2
+build2.lnk
 config.ini
 dist/
+index.html
